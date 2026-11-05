@@ -1,0 +1,7 @@
+Third-party files served by Zero-Room (all self-hosted, no CDN requests).
+
+vendor/qrcode.js      qrcode-generator 1.4.4, Kazuhiko Arase, MIT license
+                      https://github.com/kazuhikoarase/qrcode-generator
+fonts/plus-jakarta-sans-*.woff2   Plus Jakarta Sans, Tokotype, SIL Open Font License 1.1 (via @fontsource)
+fonts/geist-mono-*.woff2          Geist Mono, Vercel, SIL Open Font License 1.1 (via @fontsource)
+css/tailwind.css      generated with Tailwind CSS 3.4.17 (MIT) from index.html and js/*.js

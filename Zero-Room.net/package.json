@@ -1,0 +1,28 @@
+{
+  "name": "zero-room-net",
+  "version": "2.1.0",
+  "description": "Ultra-lightweight, zero-persistence real-time WebSocket bridge with bounded in-memory ring buffers.",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node test/rooms.test.mjs && node test/server.test.mjs && node test/features.test.mjs && node test/crypto.test.mjs && node test/pow.test.mjs && node test/files.test.mjs",
+    "loadtest": "node test/load.mjs"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "keywords": [
+    "websocket",
+    "ephemeral",
+    "zero-knowledge",
+    "realtime",
+    "bridge"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  }
+}

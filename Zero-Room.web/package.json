@@ -1,0 +1,7 @@
+{
+  "name": "zero-room-web",
+  "private": true,
+  "version": "2.2.0",
+  "type": "module",
+  "description": "Zero-Room browser client. Plain static files: no build step."
+}

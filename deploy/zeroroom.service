@@ -1,0 +1,55 @@
+[Unit]
+Description=Zero-Room Realtime WebSocket Relay
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/Zero-Room/Zero-Room.net
+ExecStart=/usr/bin/node --max-old-space-size=320 src/server.js
+# Restart after a crash, but not after a clean stop (systemctl stop).
+Restart=on-failure
+RestartSec=3
+
+Environment=NODE_ENV=production
+Environment=PORT=8888
+Environment=HOST=127.0.0.1
+# Sized for a 2 GB / 1 vCPU VPS and about 5,000 people online at once (measured: ~150 MB, ~10% of a core).
+# More tuning knobs: Zero-Room.net/README.md
+Environment=MAX_CONNECTIONS=6000
+Environment=MAX_ROOMS=3000
+# 3000 rooms x 64 KB replay buffer = 192 MB worst case, even if someone fills every buffer
+Environment=RING_MAX_BYTES=65536
+
+# Resource ceilings: if something goes wrong, only this service suffers.
+LimitNOFILE=16384
+MemoryHigh=384M
+MemoryMax=512M
+TasksMax=64
+
+# Sandbox. The relay needs nothing but a local listening socket.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=false
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

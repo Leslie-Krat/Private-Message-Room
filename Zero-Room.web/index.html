@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+  <title>zeroroom</title>
+  <meta name="description" content="Temporary end-to-end encrypted chat rooms. No accounts, no logs, no history.">
+  <meta name="theme-color" content="#FAF6EF">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/styles.css?v=6.2">
+</head>
+<body>
+
+  <!-- ================= TOP BAR (home and room) ================= -->
+  <header class="topbar">
+    <a href="/" id="brand-link" class="brand" aria-label="zeroroom home">
+      <svg class="brand-mark" aria-hidden="true" width="28" height="28" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="var(--ribbon)" />
+        <path d="M24.1 14.75 A6.5 9.5 0 1 1 21.25 9.77" stroke="var(--apricot)" stroke-width="3.6" stroke-linecap="round" />
+      </svg>
+      <span id="brand-text" class="brand-text">zeroroom</span>
+    </a>
+
+    <!-- Room identity (only inside a room) -->
+    <div id="nav-room-details" class="room-id hidden">
+      <span id="room-title" class="room-code">room/...</span>
+      <span class="room-sub">
+        <span id="room-status-subtitle" class="room-people"></span>
+        <span class="room-timer"><span id="countdown-timer">--:--</span></span>
+      </span>
+    </div>
+
+    <div class="topbar-spacer"></div>
+
+    <!-- Relay status (only on the home page) -->
+    <div id="live-status-pill" class="status-pill" title="Connection to the relay">
+      <span class="status-dot" aria-hidden="true"></span>
+      <span id="ping-display" class="status-ping">--ms</span>
+    </div>
+
+    <!-- Room actions (only inside a room) -->
+    <div id="nav-room-actions" class="room-actions hidden">
+      <button id="btn-copy-invite" type="button" class="btn btn-tint btn-sm only-wide" title="Copy invite link">
+        <svg class="ico" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5" /><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15" /></svg>
+        Copy link
+      </button>
+      <button id="btn-leave-room" type="button" class="btn btn-ghost btn-sm leave-btn" title="Leave the room" aria-label="Leave the room">
+        <svg class="ico ico-leave" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6l-6 6 6 6" /></svg>
+        <span class="leave-text">Leave</span>
+      </button>
+      <button id="btn-toggle-sidebar" type="button" class="btn btn-tint btn-sm people-btn" title="People and room settings" aria-label="People and room settings">
+        <svg class="ico" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3.2" /><path d="M3.5 19c.5-3 2.7-4.7 5.5-4.7s5 1.7 5.5 4.7" /><circle cx="17" cy="10" r="2.5" /><path d="M16.5 14.5c2.2 0 3.7 1.3 4 3.5" /></svg>
+        <span id="nav-peer-count">1</span>
+      </button>
+    </div>
+
+    <!-- Sound toggle (always visible) -->
+    <button id="btn-toggle-sound" type="button" class="icon-btn sound-btn" title="Sound is on (click to mute)" aria-label="Toggle sound">
+      <span id="sound-icon">
+        <svg class="ico ico-on" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17.5h12M7.5 17.5V11a4.5 4.5 0 0 1 9 0v6.5M10.5 20.5h3" /></svg>
+        <svg class="ico ico-off" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17.5h12M7.5 17.5V11a4.5 4.5 0 0 1 9 0v6.5M10.5 20.5h3M4 4l16 16" /></svg>
+      </span>
+    </button>
+  </header>
+
+  <!-- ================= MAIN ================= -->
+  <main class="main">
+
+    <!-- 1. HOME -->
+    <div id="launchpad-view" class="home">
+      <section class="hero">
+        <svg class="ribbon-bg" aria-hidden="true" viewBox="0 0 1440 170" preserveAspectRatio="none" fill="none" stroke-linecap="round">
+          <path d="M-20 100 C 220 20, 380 150, 640 90 S 980 30, 1100 80" stroke="var(--apricot)" stroke-width="22" vector-effect="non-scaling-stroke" />
+          <path d="M-20 122 C 220 42, 380 172, 640 112 S 980 52, 1100 102" stroke="var(--ribbon)" stroke-width="5" vector-effect="non-scaling-stroke" />
+        </svg>
+
+        <div class="hero-copy">
+          <h1 class="hero-title">A room that forgets.</h1>
+          <p class="hero-lede">Temporary chat with no account and no logs. It disappears when everyone leaves.</p>
+        </div>
+
+        <div class="card start-card">
+          <div class="field">
+            <label for="nickname-input" class="sr-only">Your name in the room</label>
+            <div class="inline-row">
+              <input type="text" id="nickname-input" class="input" maxlength="20" placeholder="Pick a name" autocomplete="off">
+              <button id="btn-random-nick" type="button" class="icon-btn" title="Pick a random name" aria-label="Pick a random name">
+                <svg class="ico" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3.5c2.5 0 3.7 1.5 5 4s2.5 4 5 4H20M4 16h3.5c1.3 0 2.2-.4 3-1.2M13 9c.8-.7 1.7-1 3-1h4M17 5l3 3-3 3M17 13l3 3-3 3" /></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Create -->
+          <div class="block">
+            <div class="block-head">
+              <h2 class="block-title">Start a room</h2>
+            </div>
+            <label for="expiry-select" class="sr-only">Room lasts</label>
+            <select id="expiry-select" class="input select" title="How long the room lasts">
+              <option value="15">Room lasts 15 minutes</option>
+              <option value="60" selected>Room lasts 1 hour</option>
+              <option value="1440">Room lasts 24 hours</option>
+            </select>
+
+            <details class="more">
+              <summary>More options</summary>
+              <div class="more-body">
+                <div class="field">
+                  <label for="create-passphrase" class="field-label">Passphrase (optional)</label>
+                  <input type="password" id="create-passphrase" class="input" autocomplete="new-password" maxlength="100" placeholder="Share it separately">
+                </div>
+                <label class="check">
+                  <input type="checkbox" id="create-approval">
+                  <span>I approve each person who joins</span>
+                </label>
+                <div class="field">
+                  <label for="create-disappear" class="field-label">Disappearing messages</label>
+                  <select id="create-disappear" class="input select">
+                    <option value="0" selected>Off</option>
+                    <option value="30">After 30 seconds</option>
+                    <option value="300">After 5 minutes</option>
+                    <option value="3600">After 1 hour</option>
+                    <option value="86400">After 24 hours</option>
+                  </select>
+                </div>
+              </div>
+            </details>
+
+            <button id="btn-create-room" type="button" class="btn btn-primary btn-lg">Create a new room</button>
+          </div>
+
+          <div class="or" aria-hidden="true"><span>or</span></div>
+
+          <!-- Join -->
+          <div class="block">
+            <div class="block-head">
+              <h2 class="block-title">Join with a link</h2>
+            </div>
+            <div class="inline-row">
+              <label for="join-room-input" class="sr-only">Invite link or code</label>
+              <input type="text" id="join-room-input" class="input input-mono" placeholder="Paste it here" autocomplete="off" spellcheck="false" maxlength="300">
+              <button id="btn-join-room" type="button" class="btn btn-tint btn-md">Join</button>
+            </div>
+            <div id="join-passphrase-wrap" class="field hidden">
+              <label for="join-passphrase" class="field-label">Passphrase</label>
+              <input type="password" id="join-passphrase" class="input" autocomplete="off" maxlength="100" placeholder="This room needs a passphrase">
+            </div>
+          </div>
+
+          <div id="launchpad-notice" role="status" class="launch-notice hidden"></div>
+          <button id="btn-install-app" type="button" class="btn btn-sunk btn-sm hidden">Install zeroroom as an app</button>
+        </div>
+      </section>
+    </div>
+
+
+    <!-- 2. ROOM -->
+    <div id="chat-view" class="chat hidden">
+
+      <!-- ===== Conversation ===== -->
+      <div id="main-conversation-panel" class="convo">
+
+        <!-- Drag and drop overlay -->
+        <div id="dropzone-overlay" class="dropzone hidden">
+          <div class="dropzone-inner">
+            <svg class="ico" aria-hidden="true" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5M8 9l4-4 4 4M5 14v4.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V14" /></svg>
+            <h4>Drop a file to send it</h4>
+            <p>Up to 2 MB.</p>
+          </div>
+        </div>
+
+        <div id="chat-scroll-container" class="scroll">
+          <div id="message-list" class="messages"></div>
+        </div>
+
+        <div id="typing-indicator" class="typing idle" aria-live="polite"></div>
+
+        <div class="composer">
+          <div class="composer-inner">
+            <!-- Reply bar -->
+            <div id="reply-bar" class="reply-bar hidden">
+              <svg class="ico" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6L4 11.5 9.5 17M4 11.5h9a6 6 0 0 1 6 6V19" /></svg>
+              <div class="reply-bar-text">
+                <div id="reply-bar-name" class="reply-bar-name"></div>
+                <div id="reply-bar-text" class="reply-bar-snippet"></div>
+              </div>
+              <button id="btn-cancel-reply" type="button" class="icon-btn icon-btn-sm" aria-label="Cancel reply">
+                <svg class="ico" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+              </button>
+            </div>
+
+            <!-- Voice recording bar (replaces the form while recording) -->
+            <div id="recording-bar" class="rec-bar hidden">
+              <span class="rec-dot" aria-hidden="true"></span>
+              <span class="rec-label">Recording</span>
+              <span id="rec-timer" class="rec-time">0:00</span>
+              <span class="grow"></span>
+              <button id="btn-rec-cancel" type="button" class="btn btn-sunk btn-sm">Cancel</button>
+              <button id="btn-rec-send" type="button" class="btn btn-primary btn-sm">Send</button>
+            </div>
+
+            <form id="chat-form" class="chat-form">
+              <input type="file" id="file-input" class="hidden">
+
+              <button type="button" id="btn-attach" class="icon-btn composer-btn" title="Send an image or a file (up to 2 MB)" aria-label="Attach a file">
+                <svg class="ico" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 11.5l-7.2 7.2a4.5 4.5 0 0 1-6.4-6.4l7.6-7.6a3 3 0 0 1 4.2 4.2l-7.5 7.5a1.5 1.5 0 0 1-2.1-2.1l6.9-6.9" /></svg>
+              </button>
+              <button type="button" id="btn-voice" class="icon-btn composer-btn" title="Record a voice note" aria-label="Record a voice note">
+                <svg class="ico" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3.5" width="6" height="11" rx="3" /><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v2.5" /></svg>
+              </button>
+              <button type="button" id="btn-toggle-emoji" class="icon-btn composer-btn" title="Emoji" aria-label="Open emoji picker">
+                <svg class="ico" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5" /><path d="M8.5 14c.8 1.4 2 2.1 3.5 2.1s2.7-.7 3.5-2.1M9 9.8v.01M15 9.8v.01" /></svg>
+              </button>
+
+              <label for="chat-input" class="sr-only">Write a message</label>
+              <input type="text" id="chat-input" class="input chat-input" placeholder="Write a message" autocomplete="off">
+
+              <button type="submit" id="btn-send" class="btn btn-primary send-btn" title="Send" aria-label="Send">
+                <span class="send-text">Send</span>
+                <svg class="ico" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4L10 14M20 4l-6.5 16-3.5-6-6-3.5L20 4z" /></svg>
+              </button>
+            </form>
+
+            <!-- Emoji picker -->
+            <div id="emoji-popover" class="emoji-pop hidden">
+              <div class="emoji-head">
+                <span class="emoji-title sr-only">Emoji</span>
+                <div class="emoji-tabs" id="emoji-tab-bar">
+                  <button type="button" class="emoji-tab-btn active" data-tab="reactions">Reactions</button>
+                  <button type="button" class="emoji-tab-btn" data-tab="faces">Faces</button>
+                  <button type="button" class="emoji-tab-btn" data-tab="gestures">Hands</button>
+                  <button type="button" class="emoji-tab-btn" data-tab="tech">Tech</button>
+                </div>
+              </div>
+              <div id="emoji-grid-reactions" class="emoji-category-grid"></div>
+              <div id="emoji-grid-faces" class="emoji-category-grid hidden"></div>
+              <div id="emoji-grid-gestures" class="emoji-category-grid hidden"></div>
+              <div id="emoji-grid-tech" class="emoji-category-grid hidden"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar backdrop (small screens) -->
+      <div id="sidebar-backdrop" class="backdrop hidden"></div>
+
+      <!-- ===== Side panel: time left, people, rules, privacy ===== -->
+      <aside id="room-sidebar" class="side" aria-label="Room panel">
+        <div class="side-head">
+          <span id="sidebar-room-name" class="side-room">room/...</span>
+          <button id="btn-close-sidebar" type="button" class="icon-btn icon-btn-sm side-close" title="Close panel" aria-label="Close panel">
+            <svg class="ico" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        </div>
+
+        <div class="side-body">
+
+          <!-- Time left -->
+          <section class="side-sec">
+            <div class="side-title-row">
+              <span class="side-kicker">Time left</span>
+              <span id="sidebar-countdown" class="big-time">--:--</span>
+            </div>
+            <div class="meter" aria-hidden="true"><div id="countdown-progress" class="meter-fill"></div></div>
+          </section>
+
+          <!-- Join requests (host only) -->
+          <section id="requests-panel" class="side-sec hidden">
+            <h2 class="side-title">Waiting at the door</h2>
+            <div id="requests-list" class="stack"></div>
+          </section>
+
+          <!-- People -->
+          <section class="side-sec">
+            <div class="side-title-row">
+              <h2 class="side-title">People</h2>
+              <span id="sidebar-peer-count" class="count-pill">1 online</span>
+            </div>
+            <div id="sidebar-peers-list" class="stack"></div>
+          </section>
+
+          <!-- Room rules -->
+          <section class="side-sec">
+            <h2 class="side-title">Room rules</h2>
+            <div id="settings-readonly" class="rules-list"></div>
+            <div id="settings-host-controls" class="host-controls hidden">
+              <label class="switch-row">
+                <span>Lock the room</span>
+                <input type="checkbox" id="opt-lock">
+              </label>
+              <label class="switch-row">
+                <span>Approve people who join</span>
+                <input type="checkbox" id="opt-approval">
+              </label>
+              <label for="opt-disappear" class="sr-only">Disappearing messages</label>
+              <select id="opt-disappear" class="input select input-sm" title="Disappearing messages">
+                <option value="0">Messages stay</option>
+                <option value="30">Disappear after 30 seconds</option>
+                <option value="300">Disappear after 5 minutes</option>
+                <option value="3600">Disappear after 1 hour</option>
+                <option value="86400">Disappear after 24 hours</option>
+              </select>
+              <div class="inline-row">
+                <button id="btn-extend-15" type="button" class="peer-action grow" title="Add 15 minutes (24 hours max)">+15 min</button>
+                <button id="btn-extend-60" type="button" class="peer-action grow" title="Add 1 hour (24 hours max)">+1 hour</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Safety fingerprint -->
+          <section class="side-sec">
+            <div class="side-title-row">
+              <h2 class="side-title" title="Everyone in the room should see the same code. Compare it over another channel, like a call.">Safety code</h2>
+              <button id="btn-copy-sidebar-fingerprint" type="button" class="link-btn" title="Copy the code">Copy</button>
+            </div>
+            <div id="sidebar-fingerprint-badge" class="code-box">Waiting for key...</div>
+          </section>
+
+          <!-- Invite -->
+          <section class="side-sec">
+            <div class="tool-row">
+              <button id="btn-sidebar-copy-link" type="button" class="tool-btn" title="Copy invite link">
+                <svg class="ico" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5" /><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15" /></svg>
+                Link
+              </button>
+              <button id="btn-sidebar-qr" type="button" class="tool-btn" title="Invite with a QR code">
+                <svg class="ico" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1.2" /><rect x="14" y="4" width="6" height="6" rx="1.2" /><rect x="4" y="14" width="6" height="6" rx="1.2" /><path d="M14 14h2.5v2.5M20 14v.01M14 20h.01M17 20h3v-3" /></svg>
+                QR
+              </button>
+              <button id="btn-sidebar-share" type="button" class="tool-btn" title="Share invite">
+                <svg class="ico" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M8 8l4-4 4 4M5 13v5.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V13" /></svg>
+                Share
+              </button>
+            </div>
+          </section>
+
+          <!-- Privacy on this device -->
+          <section class="side-sec">
+            <h2 class="side-title">On this device</h2>
+            <label class="switch-row">
+              <span>Blur when I look away</span>
+              <input type="checkbox" id="opt-blur" checked>
+            </label>
+            <div class="tool-row">
+              <button id="btn-notify" type="button" class="tool-btn">
+                <svg class="ico" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17.5h12M7.5 17.5V11a4.5 4.5 0 0 1 9 0v6.5M10.5 20.5h3" /></svg>
+                <span id="notify-label">Alerts</span>
+              </button>
+              <button id="btn-sidebar-panic" type="button" class="tool-btn tool-btn-danger" title="Wipe this screen and leave (or press Esc twice)">
+                <svg class="ico" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9 15.5H3L12 3.5z" /><path d="M12 10v4M12 16.8v.01" /></svg>
+                Panic
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <!-- Destroy (shown to the host, or to whoever is alone in the room) -->
+        <div class="side-foot">
+          <button id="btn-sidebar-burn" type="button" class="btn btn-danger btn-sm btn-block">
+            <svg class="ico" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l.8 12.5h9.4L17.5 7M10 11v5M14 11v5" /></svg>
+            Destroy room
+          </button>
+        </div>
+      </aside>
+    </div>
+
+  </main>
+
+  <!-- ================= SAFETY CODE MODAL ================= -->
+  <div id="safety-modal" class="modal-backdrop hidden">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="t-safety">
+      <div class="modal-head">
+        <h2 id="t-safety" class="modal-title">Safety code</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close">
+          <svg class="ico" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+      <p class="modal-text">Everyone in the room should see the same code. If someone sees a different one, leave and make a new room.</p>
+      <div id="modal-fingerprint" class="code-box code-box-lg">Waiting for key...</div>
+      <button id="btn-close-modal" type="button" class="btn btn-tint btn-md">Close</button>
+    </section>
+  </div>
+
+  <!-- ================= PERSON VERIFICATION MODAL ================= -->
+  <div id="verify-modal" class="modal-backdrop hidden">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="t-verify">
+      <div class="modal-head">
+        <h2 id="t-verify" class="modal-title">Is this really <span id="verify-name"></span>?</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close">
+          <svg class="ico" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+      <p class="modal-text">Read this number to each other over a call or in person. If you both see the same ten digits, it really is them.</p>
+      <div id="verify-code" class="code-box code-box-xl">----- -----</div>
+      <div class="stack">
+        <button id="btn-verify-mark" type="button" class="btn btn-primary btn-md">They match: mark as verified</button>
+        <button id="btn-close-verify" type="button" class="btn btn-tint btn-md">Close</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= IMAGE VIEWER ================= -->
+  <div id="view-modal" class="modal-backdrop hidden">
+    <section class="modal modal-view" role="dialog" aria-modal="true" aria-label="Picture">
+      <img id="view-img" class="view-img" alt="Picture from the room">
+      <div class="view-actions">
+        <a id="view-save" class="btn btn-primary btn-md" href="#" download="image.jpg">Save</a>
+        <button type="button" class="btn btn-tint btn-md" data-close>Close</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= MESSAGE ACTION MENU ================= -->
+  <div id="msg-menu" class="msg-menu hidden" role="menu">
+    <div id="msg-menu-reactions" class="menu-reactions"></div>
+    <button id="msg-menu-reply" type="button" class="msg-menu-item" role="menuitem">Reply</button>
+    <button id="msg-menu-copy" type="button" class="msg-menu-item" role="menuitem">Copy text</button>
+    <button id="msg-menu-delete" type="button" class="msg-menu-item danger" role="menuitem">Delete for everyone</button>
+  </div>
+
+  <!-- ================= QR MODAL ================= -->
+  <div id="qr-modal" class="modal-backdrop hidden">
+    <section class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="t-qr">
+      <div class="modal-head">
+        <h2 id="t-qr" class="modal-title">Invite</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close">
+          <svg class="ico" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+      <div class="qr-frame"><div id="qrcode-canvas-container"></div></div>
+      <p class="modal-text center">Scan with a phone camera to join.</p>
+      <button id="btn-close-qr-modal" type="button" class="btn btn-tint btn-md">Close</button>
+    </section>
+  </div>
+
+
+  <script src="vendor/qrcode.js"></script>
+  <script type="module" src="js/app.js?v=6.2"></script>
+</body>
+</html>
